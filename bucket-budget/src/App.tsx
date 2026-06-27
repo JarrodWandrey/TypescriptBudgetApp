@@ -59,9 +59,11 @@ export default function App() {
     setSelectedBucket(null);
   }
 
-  const centerX = 170;
-  const centerY = 170;
-  const radius = 140;
+  const padding = 40;
+  const ringSize = window.innerWidth * 0.9;
+  const centerX = ringSize / 2;
+  const centerY = ringSize / 2;
+  const radius = (ringSize / 2) - padding;
 
   function getPosition(index: number, total: number) {
     const angle = (index / total) * 2 * Math.PI - Math.PI / 2; // Start from the top
@@ -99,7 +101,13 @@ export default function App() {
               onClose={handleCloseHistory}
             />
           )}
-      <div className="bucket-ring" style={{ position: "relative", width: "300px", height: "300px", margin: "80px auto"}}>
+        <div className="bucket-ring" style={{
+          position: "relative",
+          width: `${ringSize}px`,
+          height: `${ringSize}px`,
+          margin: "0 auto",
+          overflow: "visible"
+        }}>
         {buckets.map((bucket, index) => {
           const pos = getPosition(index, buckets.length);
           let pressTimer: ReturnType<typeof setTimeout>
