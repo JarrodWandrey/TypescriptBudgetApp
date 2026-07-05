@@ -23,11 +23,12 @@ export default function TransactionForm({ bucket, onSubmit, onCancel }: Props) {
             <h2>Log spend - {bucket.name}</h2>
             <input
                 type="number"
+                inputMode="decimal"
                 placeholder="Amount"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 onKeyDown={(e) => {
-                    if (!/[0-9]/.test(e.key) && e.key !== "Backspace" && e.key !== "Tab"){
+                    if (!/[0-9.]/.test(e.key) && e.key !== "Backspace" && e.key !== "Tab"){
                         e.preventDefault();
                     }
                 }}

@@ -37,6 +37,7 @@ export default function BucketForm({ onAdd }: Props) {
             <div className="form-row">
                 <input
                     type="number"
+                    inputMode="decimal"
                     placeholder="Spending limit"
                     value={limit}
                     onChange={(e) => setLimit(e.target.value)}
