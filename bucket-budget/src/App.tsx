@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Bucket, Transaction } from "./types";
-import { saveBuckets, getBuckets, deleteBucket, saveTransactions, getTransactions, createTransaction, resetBuckets } from "./store";
+import { saveBuckets, getBuckets, deleteBucket, saveTransactions, getTransactions, createTransaction, resetBuckets, renameBucket } from "./store";
 import BucketCard from "./BucketCard";
 import BucketForm from "./BucketForm";
 import TransactionForm from "./TransactionForm";
@@ -28,6 +28,11 @@ export default function App() {
 
   function handleSelectBucket(bucket: Bucket) {
     setSelectedBucket(bucket);
+  }
+
+  function handleRenameBucket(id: string, newName: string) {
+    renameBucket(id, newName);
+    setBuckets(getBuckets());
   }
 
   function handleLogTransaction(amount: number, description: string) {
@@ -131,7 +136,7 @@ export default function App() {
               }}
               onTouchEnd={() => { clearTimeout(pressTimer)}}
               >
-              <BucketCard bucket={bucket} onHistory={() => handleShowHistory(bucket)}/>
+              <BucketCard bucket={bucket} onHistory={() => handleShowHistory(bucket)} onRename={(newName) => handleRenameBucket(bucket.id, newName)}/>
             </div>
           );
         })}

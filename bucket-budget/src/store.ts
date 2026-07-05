@@ -19,6 +19,13 @@ export function createBucket(name: string, limit: number, color: string): Bucket
     };
 }
 
+export function renameBucket(id: string, newName: string): void {
+    const buckets = getBuckets().map((b) =>
+        b.id === id ? { ...b, name: newName } : b
+    );
+    saveBuckets(buckets);
+}
+
 export function deleteBucket(id: string): void {
     const buckets = getBuckets().filter((b) => b.id !== id);
     saveBuckets(buckets);

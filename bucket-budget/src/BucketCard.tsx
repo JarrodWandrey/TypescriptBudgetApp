@@ -1,11 +1,16 @@
 import type { Bucket } from "./types";
+import { useState } from "react";
 
 interface Props {
     bucket: Bucket;
     onHistory: () => void;
+    onRename: (newName: string) => void;
 }
 
-export default function BucketCard({ bucket, onHistory }: Props) {
+export default function BucketCard({ bucket, onHistory, onRename }: Props) {
+    const [editing, setEditing] = useState(false);
+    const [nameInput, setNameInput] = useState(bucket.name);
+
     const fillPercentage = Math.min((bucket.spent / bucket.limit) * 100, 100);
     const bucketHeight = 50;
     const fillHeight = Math.max((fillPercentage / 100) * bucketHeight, 0);
@@ -16,6 +21,14 @@ export default function BucketCard({ bucket, onHistory }: Props) {
         if (fillPercentage >= 100) return "bucket-danger";
         if (fillPercentage >= 75) return "bucket-warning";
         return "bucket-safe";
+    }
+
+    function handleRenameSubmit() {
+        if (nameInput.trim())
+        {
+            onRename(nameInput.trim());
+        }
+        setEditing(false);
     }
 
     return (
@@ -74,28 +87,61 @@ export default function BucketCard({ bucket, onHistory }: Props) {
                 </div>
                 </>
             )}
-            <p style={{ fontSize: "10px", margin: "2px 0", color: bucket.color }}>{bucket.name}</p>
-            <p style={{ fontSize: "9px", margin: 0, color: "#888", whiteSpace: "nowrap" }}>
-                ${bucket.spent.toFixed(2)} / ${bucket.limit.toFixed(2)}
-            </p>
-            <button
-                onClick={(e) => {
-                e.stopPropagation();
-                onHistory();
-                }}
-                style={{
-                fontSize: "8px",
-                padding: "2px 6px",
-                marginTop: "2px",
-                border: "1px solid #e0e0e0",
-                borderRadius: "4px",
-                background: "white",
-                cursor: "pointer",
-                color: "#888",
-                }}
-            >
-                history
-            </button>
-        </div>
-    )
+            {editing ? (
+        <input
+          autoFocus
+          value={nameInput}
+          onChange={(e) => setNameInput(e.target.value)}
+          onBlur={handleRenameSubmit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleRenameSubmit();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            fontSize: "10px",
+            width: "60px",
+            textAlign: "center",
+            border: `1px solid ${bucket.color}`,
+            borderRadius: "4px",
+            padding: "1px 2px",
+            color: bucket.color,
+            background: "white",
+          }}
+        />
+      ) : (
+        <p
+          style={{ fontSize: "10px", margin: "2px 0", color: bucket.color }}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            setEditing(true);
+          }}
+        >
+          {bucket.name}
+        </p>
+      )}
+
+      <p style={{ fontSize: "9px", margin: 0, color: "#888", whiteSpace: "nowrap" }}>
+        ${bucket.spent.toFixed(2)}/${bucket.limit.toFixed(2)}
+      </p>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onHistory();
+        }}
+        style={{
+          fontSize: "8px",
+          padding: "2px 6px",
+          marginTop: "2px",
+          border: "1px solid #e0e0e0",
+          borderRadius: "4px",
+          background: "white",
+          cursor: "pointer",
+          color: "#888",
+        }}
+      >
+        history
+      </button>
+    </div>
+  );
 }
