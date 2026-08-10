@@ -1,8 +1,9 @@
 import { useState } from "react";
 import type { Bucket, Transaction } from "./types";
-import { saveBuckets, getBuckets, deleteBucket, saveTransactions, getTransactions, createTransaction, resetBuckets, renameBucket } from "./store";
+import { saveBuckets, getBuckets, deleteBucket, saveTransactions, getTransactions, createTransaction, resetBuckets, updateBucket } from "./store";
 import BucketCard from "./BucketCard";
 import BucketForm from "./BucketForm";
+import BucketEditForm from "./BucketEditForm";
 import TransactionForm from "./TransactionForm";
 import TransactionHistory from "./TransactionHistory";
 import "./App.css";
@@ -12,15 +13,16 @@ export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>(getTransactions());
   const [selectedBucket, setSelectedBucket] = useState<Bucket | null>(null);
   const [historyBucket, setHistoryBucket] = useState<Bucket | null>(null);
+  const [editBucket, setEditBucket] = useState<Bucket | null>(null);
 
-  function handleAddBucket( bucket : Bucket) {
+  function handleAddBucket(bucket: Bucket) {
     const updated = [...buckets, bucket];
     saveBuckets(updated);
     setBuckets(updated);
   }
 
   function handleDeleteBucket(id: string) {
-    if (window.confirm("Delete this bucket?")){
+    if (window.confirm("Delete this bucket?")) {
       deleteBucket(id);
       setBuckets(getBuckets());
     }
@@ -30,9 +32,17 @@ export default function App() {
     setSelectedBucket(bucket);
   }
 
-  function handleRenameBucket(id: string, newName: string) {
-    renameBucket(id, newName);
+  function handleEditBucket(bucket: Bucket) {
+    setEditBucket(bucket);
+  }
+
+  function handleCloseEdit() {
+    setEditBucket(null);
+  }
+  function handleUpdateBucket(id: string, newName: string, newLimit: number, newColor: string) {
+    updateBucket(id, newName, newLimit, newColor);
     setBuckets(getBuckets());
+    setEditBucket(null);
   }
 
   function handleLogTransaction(amount: number, description: string) {
@@ -91,28 +101,37 @@ export default function App() {
         <button className="reset-button" onClick={handleResetBuckets}>Reset data</button>
       </div>
 
-      <BucketForm onAdd={handleAddBucket}/>
+      <BucketForm onAdd={handleAddBucket} />
       {selectedBucket && (
-            <TransactionForm
-              bucket={selectedBucket}
-              onSubmit={handleLogTransaction}
-              onCancel={handleCancel}
-            />
-          )}
-          {historyBucket && (
-            <TransactionHistory
-              bucket={historyBucket}
-              transactions={transactions}
-              onClose={handleCloseHistory}
-            />
-          )}
-        <div className="bucket-ring" style={{
-          position: "relative",
-          width: `${ringSize}px`,
-          height: `${ringSize}px`,
-          margin: "0 auto",
-          overflow: "visible"
-        }}>
+        <TransactionForm
+          bucket={selectedBucket}
+          onSubmit={handleLogTransaction}
+          onCancel={handleCancel}
+        />
+      )}
+      {historyBucket && (
+        <TransactionHistory
+          bucket={historyBucket}
+          transactions={transactions}
+          onClose={handleCloseHistory}
+        />
+      )}
+      {editBucket && (
+        <BucketEditForm
+          bucket={editBucket}
+          onSubmit={(newName, newLimit, newColor) =>
+            handleUpdateBucket(editBucket.id, newName, newLimit, newColor)
+          }
+          onCancel={handleCloseEdit}
+        />
+      )}
+      <div className="bucket-ring" style={{
+        position: "relative",
+        width: `${ringSize}px`,
+        height: `${ringSize}px`,
+        margin: "0 auto",
+        overflow: "visible"
+      }}>
         {buckets.map((bucket, index) => {
           const pos = getPosition(index, buckets.length);
           let pressTimer: ReturnType<typeof setTimeout>
@@ -130,13 +149,18 @@ export default function App() {
               onMouseDown={() => {
                 pressTimer = setTimeout(() => handleDeleteBucket(bucket.id), 500);
               }}
-              onMouseUp={() => { clearTimeout(pressTimer)}}
+              onMouseUp={() => { clearTimeout(pressTimer) }}
               onTouchStart={() => {
                 pressTimer = setTimeout(() => handleDeleteBucket(bucket.id), 500);
               }}
-              onTouchEnd={() => { clearTimeout(pressTimer)}}
-              >
-              <BucketCard bucket={bucket} onHistory={() => handleShowHistory(bucket)} onRename={(newName) => handleRenameBucket(bucket.id, newName)}/>
+              onTouchEnd={() => { clearTimeout(pressTimer) }}
+            >
+              <BucketCard
+                bucket={bucket}
+                onHistory={() => handleShowHistory(bucket)}
+                onEdit={() => handleEditBucket(bucket)}
+                onUpdate={(newName, newLimit, newColor) => handleUpdateBucket(bucket.id, newName, newLimit, newColor)}
+              />
             </div>
           );
         })}

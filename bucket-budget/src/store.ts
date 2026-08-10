@@ -19,9 +19,9 @@ export function createBucket(name: string, limit: number, color: string): Bucket
     };
 }
 
-export function renameBucket(id: string, newName: string): void {
+export function updateBucket(id: string, newName: string, newLimit: number, newColor: string): void {
     const buckets = getBuckets().map((b) =>
-        b.id === id ? { ...b, name: newName } : b
+        b.id === id ? { ...b, name: newName, limit: newLimit, color: newColor } : b
     );
     saveBuckets(buckets);
 }
