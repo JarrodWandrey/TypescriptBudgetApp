@@ -1,5 +1,4 @@
 import type { Bucket } from "./types";
-import { useState } from "react";
 
 interface Props {
   bucket: Bucket;
