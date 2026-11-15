@@ -1,75 +1,115 @@
-# React + TypeScript + Vite
+# 🪣 Budget Buckets
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A personal budgeting app built with React and TypeScript. Create spending categories as visual buckets, log your expenses, and watch them fill up as you spend. Built as a mobile-first PWA so it lives on your phone like a native app.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Visual buckets** — each category is represented as an SVG bucket that fills up as you spend
+- **Ring layout** — buckets are arranged in a circle for at-a-glance visibility
+- **Spend logging** — tap any bucket to log a transaction against it
+- **Transaction history** — view a full list of expenses per bucket
+- **Animated warnings** — buckets shake at 75% capacity and drip water when overflowing at 100%
+- **New month reset** — zero out all buckets at the start of a new budget period
+- **Persistent storage** — all data is saved locally to your device via localStorage
+- **PWA** — installable on your phone home screen, works offline
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- [React](https://react.dev/) — UI components
+- [TypeScript](https://www.typescriptlang.org/) — type safety throughout
+- [Vite](https://vitejs.dev/) — build tool and dev server
+- [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) — PWA support
+- localStorage — client-side data persistence, no backend required
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Getting Started
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prerequisites
 
+- Node.js v20+
+- npm
+
+### Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/your-username/bucket-budget.git
+cd bucket-budget
+
+# Install dependencies
+npm install
+
+# Start the dev server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Then open [http://localhost:5173](http://localhost:5173) in your browser.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Build for Production
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
+```
+
+The output will be in the `dist` folder, ready to deploy.
+
+---
+
+## Project Structure
 
 ```
+src/
+├── types.ts              # Bucket and Transaction interfaces
+├── store.ts              # localStorage read/write and data helpers
+├── App.tsx               # Root component, state management, ring layout
+├── App.css               # Global styles and animations
+├── BucketCard.tsx        # SVG bucket visual with fill and animations
+├── BucketForm.tsx        # Form for creating a new bucket
+├── TransactionForm.tsx   # Form for logging a spend against a bucket
+└── TransactionHistory.tsx # List of past transactions for a bucket
+```
+
+---
+
+## Usage
+
+### Adding a Bucket
+Fill in a name, spending limit, and pick a color in the form at the top, then tap **Add Bucket**.
+
+### Logging a Transaction
+Tap any bucket in the ring to open the transaction form. Enter an amount and an optional description, then tap **Log**.
+
+### Viewing History
+Tap the **history** button under any bucket to see all transactions logged against it.
+
+### Deleting a Bucket
+Long press a bucket for half a second to delete it.
+
+### Starting a New Month
+Tap **Reset Data** in the top right to zero out all bucket spending for a new budget period.
+
+---
+
+## Deployment
+
+This app is deployed via [Netlify](https://netlify.com) with automatic deploys on every push to `main`.
+
+---
+
+## Future Ideas
+
+- Edit bucket name, limit, or color after creation
+- Delete individual transactions from history
+- Total spent vs total budgeted summary in the center of the ring
+- Haptic feedback on mobile when logging a transaction
+
+---
+
+## License
+
+MIT
