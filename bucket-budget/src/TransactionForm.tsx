@@ -11,16 +11,18 @@ export default function TransactionForm({ bucket, onSubmit, onCancel }: Props) {
     const [amount, setAmount] = useState("");
     const [description, setDescription] = useState("");
 
-    function handleSubmit(){
-        if (!amount || !description) return;
+    function handleSubmit() {
+        if (!amount) return;
         onSubmit(parseFloat(amount), description);
         setAmount("");
         setDescription("");
     }
 
     return (
-        <div className="transaction-card">
-            <h2>Log spend - {bucket.name}</h2>
+        <>
+            <p className="modal-title" style={{ color: bucket.color }}>
+                Log spend — {bucket.name}
+            </p>
             <input
                 type="number"
                 inputMode="decimal"
@@ -28,19 +30,22 @@ export default function TransactionForm({ bucket, onSubmit, onCancel }: Props) {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 onKeyDown={(e) => {
-                    if (!/[0-9.]/.test(e.key) && e.key !== "Backspace" && e.key !== "Tab"){
+                    if (!/[0-9.]/.test(e.key) && e.key !== "Backspace" && e.key !== "Tab") {
                         e.preventDefault();
                     }
                 }}
+                autoFocus
             />
             <input
                 type="text"
-                placeholder="Description"
+                placeholder="Description (optional)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
             />
-            <button onClick={handleSubmit}>Submit</button>
-            <button onClick={onCancel}>Cancel</button>
-        </div>
-    )
+            <div className="modal-buttons">
+                <button className="btn-primary" onClick={handleSubmit}>Log</button>
+                <button className="btn-secondary" onClick={onCancel}>Cancel</button>
+            </div>
+        </>
+    );
 }

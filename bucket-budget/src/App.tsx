@@ -1,7 +1,16 @@
 import { useState } from "react";
 import type { Bucket, Transaction } from "./types";
-import { saveBuckets, getBuckets, deleteBucket, saveTransactions, getTransactions, createTransaction, resetBuckets, updateBucket } from "./store";
-import BucketCard from "./BucketCard";
+import {
+  saveBuckets,
+  getBuckets,
+  deleteBucket,
+  saveTransactions,
+  getTransactions,
+  createTransaction,
+  resetBuckets,
+  updateBucket,
+} from "./store";
+import BucketRow from "./BucketRow";
 import BucketForm from "./BucketForm";
 import BucketEditForm from "./BucketEditForm";
 import TransactionForm from "./TransactionForm";
@@ -14,11 +23,20 @@ export default function App() {
   const [selectedBucket, setSelectedBucket] = useState<Bucket | null>(null);
   const [historyBucket, setHistoryBucket] = useState<Bucket | null>(null);
   const [editBucket, setEditBucket] = useState<Bucket | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [openRowId, setOpenRowId] = useState<string | null>(null);
 
+  // ── Stats ──────────────────────────────────────────────────
+  const totalBudget = buckets.reduce((s, b) => s + b.limit, 0);
+  const totalSpent = buckets.reduce((s, b) => s + b.spent, 0);
+  const totalRemaining = totalBudget - totalSpent;
+
+  // ── Handlers ───────────────────────────────────────────────
   function handleAddBucket(bucket: Bucket) {
     const updated = [...buckets, bucket];
     saveBuckets(updated);
     setBuckets(updated);
+    setShowAddForm(false);
   }
 
   function handleDeleteBucket(id: string) {
@@ -28,10 +46,6 @@ export default function App() {
     }
   }
 
-  function handleSelectBucket(bucket: Bucket) {
-    setSelectedBucket(bucket);
-  }
-
   function handleEditBucket(bucket: Bucket) {
     setEditBucket(bucket);
   }
@@ -39,6 +53,7 @@ export default function App() {
   function handleCloseEdit() {
     setEditBucket(null);
   }
+
   function handleUpdateBucket(id: string, newName: string, newLimit: number, newColor: string) {
     updateBucket(id, newName, newLimit, newColor);
     setBuckets(getBuckets());
@@ -52,7 +67,9 @@ export default function App() {
     const updatedTransactions = [...transactions, transaction];
 
     const updatedBuckets = buckets.map((bucket) =>
-      bucket.id === selectedBucket.id ? { ...bucket, spent: bucket.spent + amount } : bucket
+      bucket.id === selectedBucket.id
+        ? { ...bucket, spent: bucket.spent + amount }
+        : bucket
     );
 
     saveTransactions(updatedTransactions);
@@ -70,101 +87,115 @@ export default function App() {
     setHistoryBucket(null);
   }
 
-  function handleCancel() {
-    setSelectedBucket(null);
-  }
-
-  const padding = 40;
-  const ringSize = window.innerWidth * 0.9;
-  const centerX = ringSize / 2;
-  const centerY = ringSize / 2;
-  const radius = (ringSize / 2) - padding;
-
-  function getPosition(index: number, total: number) {
-    const angle = (index / total) * 2 * Math.PI - Math.PI / 2; // Start from the top
-
-    return {
-      x: centerX + radius * Math.cos(angle),
-      y: centerY + radius * Math.sin(angle)
-    };
-  }
-
   function handleResetBuckets() {
-    resetBuckets();
-    setBuckets(getBuckets());
+    if (window.confirm("Reset all spending for the new pay period?")) {
+      resetBuckets();
+      setBuckets(getBuckets());
+    }
   }
 
   return (
     <div className="app-container">
+      {/* Header */}
       <div className="top-bar">
-        <h1>Budget Buckets</h1>
-        <button className="reset-button" onClick={handleResetBuckets}>Reset data</button>
+        <span className="app-title">Budget Buckets</span>
+        <button className="reset-button" onClick={handleResetBuckets}>
+          New Pay Period
+        </button>
       </div>
 
-      <BucketForm onAdd={handleAddBucket} />
+      {/* Stats strip */}
+      <div className="stats-strip">
+        <div className="stat-item">
+          <span className="stat-label">Budget</span>
+          <span className="stat-value">${totalBudget.toFixed(0)}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Spent</span>
+          <span className="stat-value spent">${totalSpent.toFixed(0)}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Left</span>
+          <span className={`stat-value ${totalRemaining < 0 ? "over" : "remaining"}`}>
+            ${Math.abs(totalRemaining).toFixed(0)}
+            {totalRemaining < 0 ? " over" : ""}
+          </span>
+        </div>
+      </div>
+
+      {/* Row list */}
+      <div className="bucket-list" onClick={() => setOpenRowId(null)}>
+        {buckets.map((bucket) => (
+          <BucketRow
+            key={bucket.id}
+            bucket={bucket}
+            isOpen={openRowId === bucket.id}
+            onOpen={() => setOpenRowId(bucket.id)}
+            onClose={() => setOpenRowId(null)}
+            onSelect={() => setSelectedBucket(bucket)}
+            onDelete={() => handleDeleteBucket(bucket.id)}
+            onEdit={() => handleEditBucket(bucket)}
+            onHistory={() => handleShowHistory(bucket)}
+          />
+        ))}
+      </div>
+
+      {/* FAB */}
+      <button className="fab" onClick={() => setShowAddForm(true)} aria-label="Add bucket">
+        +
+      </button>
+
+      {/* ── Modals ──────────────────────────────────────────── */}
+
+      {showAddForm && (
+        <div className="modal-overlay" onClick={() => setShowAddForm(false)}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <BucketForm onAdd={handleAddBucket} onCancel={() => setShowAddForm(false)} />
+          </div>
+        </div>
+      )}
+
       {selectedBucket && (
-        <TransactionForm
-          bucket={selectedBucket}
-          onSubmit={handleLogTransaction}
-          onCancel={handleCancel}
-        />
+        <div className="modal-overlay" onClick={() => setSelectedBucket(null)}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <TransactionForm
+              bucket={selectedBucket}
+              onSubmit={handleLogTransaction}
+              onCancel={() => setSelectedBucket(null)}
+            />
+          </div>
+        </div>
       )}
-      {historyBucket && (
-        <TransactionHistory
-          bucket={historyBucket}
-          transactions={transactions}
-          onClose={handleCloseHistory}
-        />
-      )}
-      {editBucket && (
-        <BucketEditForm
-          bucket={editBucket}
-          onSubmit={(newName, newLimit, newColor) =>
-            handleUpdateBucket(editBucket.id, newName, newLimit, newColor)
-          }
-          onCancel={handleCloseEdit}
-        />
-      )}
-      <div className="bucket-ring" style={{
-        position: "relative",
-        width: `${ringSize}px`,
-        height: `${ringSize}px`,
-        margin: "0 auto",
-        overflow: "visible"
-      }}>
-        {buckets.map((bucket, index) => {
-          const pos = getPosition(index, buckets.length);
-          let pressTimer: ReturnType<typeof setTimeout>
 
-          return (
-            <div
-              key={bucket.id}
-              style={{
-                position: "absolute",
-                left: `${pos.x}px`,
-                top: `${pos.y}px`,
-                transform: "translate(-50%, -50%)"
-              }}
-              onClick={() => handleSelectBucket(bucket)}
-              onMouseDown={() => {
-                pressTimer = setTimeout(() => handleDeleteBucket(bucket.id), 500);
-              }}
-              onMouseUp={() => { clearTimeout(pressTimer) }}
-              onTouchStart={() => {
-                pressTimer = setTimeout(() => handleDeleteBucket(bucket.id), 500);
-              }}
-              onTouchEnd={() => { clearTimeout(pressTimer) }}
-            >
-              <BucketCard
-                bucket={bucket}
-                onHistory={() => handleShowHistory(bucket)}
-                onEdit={() => handleEditBucket(bucket)}
-                onUpdate={(newName, newLimit, newColor) => handleUpdateBucket(bucket.id, newName, newLimit, newColor)}
-              />
-            </div>
-          );
-        })}
-      </div>
+      {historyBucket && (
+        <div className="modal-overlay" onClick={handleCloseHistory}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <TransactionHistory
+              bucket={historyBucket}
+              transactions={transactions}
+              onClose={handleCloseHistory}
+            />
+          </div>
+        </div>
+      )}
+
+      {editBucket && (
+        <div className="modal-overlay" onClick={handleCloseEdit}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <BucketEditForm
+              bucket={editBucket}
+              onSubmit={(newName, newLimit, newColor) =>
+                handleUpdateBucket(editBucket.id, newName, newLimit, newColor)
+              }
+              onCancel={handleCloseEdit}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
