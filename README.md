@@ -90,8 +90,8 @@ Tap the **history** button under any bucket to see all transactions logged again
 ### Deleting/Editing a bucket
 Slide the bucket row to the left to expose the two buttons
 
-### Starting a New Pay Period
-Tap **Reset Data** in the top right to zero out all bucket spending for a new budget period.
+### Starting a New Month
+Tap **Reset Data** in the top right to zero out all bucket spending for a new month.
 
 ---
 

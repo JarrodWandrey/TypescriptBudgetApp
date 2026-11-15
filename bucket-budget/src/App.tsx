@@ -88,7 +88,7 @@ export default function App() {
   }
 
   function handleResetBuckets() {
-    if (window.confirm("Reset all spending for the new pay period?")) {
+    if (window.confirm("Reset all spending for the new month?")) {
       resetBuckets();
       setBuckets(getBuckets());
     }
@@ -100,7 +100,7 @@ export default function App() {
       <div className="top-bar">
         <span className="app-title">Budget Buckets</span>
         <button className="reset-button" onClick={handleResetBuckets}>
-          New Pay Period
+          New Month
         </button>
       </div>
 
