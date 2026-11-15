@@ -82,15 +82,15 @@ src/
 Fill in a name, spending limit, and pick a color in the form at the top, then tap **Add Bucket**.
 
 ### Logging a Transaction
-Tap any bucket in the ring to open the transaction form. Enter an amount and an optional description, then tap **Log**.
+Tap any bucket in the list to open the transaction form. Enter an amount and an optional description, then tap **Log**.
 
 ### Viewing History
 Tap the **history** button under any bucket to see all transactions logged against it.
 
-### Deleting a Bucket
-Long press a bucket for half a second to delete it.
+### Deleting/Editing a bucket
+Slide the bucket row to the left to expose the two buttons
 
-### Starting a New Month
+### Starting a New Pay Period
 Tap **Reset Data** in the top right to zero out all bucket spending for a new budget period.
 
 ---
@@ -103,9 +103,7 @@ This app is deployed via [Netlify](https://netlify.com) with automatic deploys o
 
 ## Future Ideas
 
-- Edit bucket name, limit, or color after creation
 - Delete individual transactions from history
-- Total spent vs total budgeted summary in the center of the ring
 - Haptic feedback on mobile when logging a transaction
 
 ---
