@@ -23,19 +23,26 @@ export default function BucketRow({ bucket, isOpen, onOpen, onClose, onSelect, o
   const didSwipe = useRef(false);
   const currentOffset = useRef(0);
   const rowRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const fillPct = Math.min((bucket.spent / bucket.limit) * 100, 100);
 
-  // Close when clicking anywhere outside this row
+  // Close when clicking anywhere outside this row's wrapper
   useEffect(() => {
     if (!isOpen) return;
     function handleOutsideClick(e: MouseEvent) {
-      if (rowRef.current && !rowRef.current.closest(".bucket-row-wrap")?.contains(e.target as Node)) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
         onClose();
       }
     }
-    document.addEventListener("click", handleOutsideClick);
-    return () => document.removeEventListener("click", handleOutsideClick);
+    // Use setTimeout so this listener doesn't catch the same click that opened the row
+    const timer = setTimeout(() => {
+      document.addEventListener("click", handleOutsideClick);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("click", handleOutsideClick);
+    };
   }, [isOpen, onClose]);
 
   // Keep currentOffset in sync with isOpen so drag math stays correct
@@ -125,8 +132,7 @@ export default function BucketRow({ bucket, isOpen, onOpen, onClose, onSelect, o
     }
   }
 
-  function handleClick(e: React.MouseEvent) {
-    e.stopPropagation(); // prevent document listener from firing on the same click
+  function handleClick(_e: React.MouseEvent) {
     if (didSwipe.current) return;
     if (isOpen) {
       onClose();
@@ -148,7 +154,7 @@ export default function BucketRow({ bucket, isOpen, onOpen, onClose, onSelect, o
   }
 
   return (
-    <div className="bucket-row-wrap">
+    <div className="bucket-row-wrap" ref={wrapperRef}>
       {/* Action buttons */}
       <div className="bucket-row-actions">
         <button
@@ -194,7 +200,7 @@ export default function BucketRow({ bucket, isOpen, onOpen, onClose, onSelect, o
             compact
             onHistory={onHistory}
             onEdit={onEdit}
-            onUpdate={() => {}}
+            onUpdate={() => { }}
           />
         </div>
 
